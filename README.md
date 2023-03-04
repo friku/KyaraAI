@@ -60,6 +60,8 @@ jsonの各要素はchatGPTに渡すmessageです。
 # 最大トークン数を超えないための対処
 LLMに入力可能なトークン数が決まっており、openaiのchatGPTの場合4096が最大入力トークン数です。
 chatGPTの場合、最大入力トークン数を超えた入力をするとエラーが返ってきます。
+エラーを避けるためにプロンプトとして入力する会話数を削減しています。
+  https://github.com/friku/KyaraAI/blob/48999d74b3eb8addf7bb58fbabdd7094742dc777/characterAI.py#L111
 
 
 # Future work
