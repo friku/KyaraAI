@@ -1,2 +1,3 @@
 characterConfig/**/context.json
 myCharacterConfig/**/*
+chatLogs/**
