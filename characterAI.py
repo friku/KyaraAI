@@ -113,6 +113,7 @@ class ChatController():
         self.characterAIs = characterAIs
         self.speakerID = 0
         self.chatLogsDir = Path('./chatLogs')
+        self.makeChatLog()
 
     def initContextAll(self):
         for characterAI in self.characterAIs:
@@ -141,12 +142,17 @@ class ChatController():
         self.addChatLog(response)
         return response
     
-    def addChatLog(self, response):
-        with open(self.chatLogsDir / 'chatLog.txt', 'a', encoding="utf-8") as f:
-            f.write(f'{response}\n')
-        
-
+    def makeChatLog(self):
+        # すべての参加キャラの名前取得し、_でつなげる
+        self.attendants = [characterAI.characterName for characterAI in self.characterAIs]
+        allAttendants = '_'.join(self.attendants)
+        self.logFileName = time.strftime('%Y%m%d_%H%M%S', time.localtime()) + f'_({allAttendants}).txt'
+        with open(self.chatLogsDir / self.logFileName, 'a', encoding="utf-8") as f:
+            f.write(f'{allAttendants}\n')
     
+    def addChatLog(self, response):
+        with open(self.chatLogsDir / self.logFileName, 'a', encoding="utf-8") as f:
+            f.write(f'{response}\n')
 
 
 def main():
