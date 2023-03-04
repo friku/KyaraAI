@@ -112,6 +112,7 @@ class ChatController():
     def __init__(self, characterAIs: list):
         self.characterAIs = characterAIs
         self.speakerID = 0
+        self.chatLogsDir = Path('./chatLogs')
 
     def initContextAll(self):
         for characterAI in self.characterAIs:
@@ -137,7 +138,13 @@ class ChatController():
         response = speaker.getResponse()
         self.addContextAll("user", response)
         print(response)
+        self.addChatLog(response)
         return response
+    
+    def addChatLog(self, response):
+        with open(self.chatLogsDir / 'chatLog.txt', 'a', encoding="utf-8") as f:
+            f.write(f'{response}\n')
+        
 
     
 
