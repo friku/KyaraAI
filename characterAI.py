@@ -56,7 +56,7 @@ class contextDB_json():
             data.append({"role": role, "content": message})
             json.dump(data, f, ensure_ascii=False)
 
-    def get(self):
+    def get(self) -> list:
         with open(self.filename) as f:
             data = json.load(f)
             return data
@@ -67,7 +67,7 @@ class contextDB_json():
 
 
 class CharacterAI():
-    def __init__(self, LLM, characterName: str, contextDBClass):
+    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json):
         self.LLM = LLM
         self.characterName = characterName
         self.contextPath = Path('./characterConfig') / \
@@ -83,20 +83,21 @@ class CharacterAI():
     def initContext(self):
         self.contextDB.init()
         self.addIdentity(self.identityPath)
-    
+
     def formatResponse(self, response):
         try:
             splitResponse = re.split("としての発言]|\n", response["content"])
             talkResponse = splitResponse[-1]
             formatResponse = f'[{self.characterName}としての発言]\n{talkResponse}'
         except:
-            import pdb; pdb.set_trace()
-        return {"formatResponse":formatResponse}
+            import pdb
+            pdb.set_trace()
+        return {"formatResponse": formatResponse}
 
     def getResponse(self):
-        context = self.contextDB.get()
-        response = self.LLM.getResponce(context)
-        formatResponse= self.formatResponse(response)["formatResponse"]
+        prompt = self.makePrompt()
+        response = self.LLM.getResponce(prompt)
+        formatResponse = self.formatResponse(response)["formatResponse"]
         return formatResponse
 
     def addContext(self, role, message):
@@ -106,6 +107,14 @@ class CharacterAI():
         with open(identityPath, 'r', encoding="utf-8") as f:
             identityContext = f.read()
         self.contextDB.add("system", identityContext)
+
+    def makePrompt(self):
+        context = self.contextDB.get()
+        if len(context) >= 20:
+            prompt = context[0:2] + context[-18:]
+        else :
+            prompt = context
+        return prompt
 
 
 class ChatController():
@@ -118,14 +127,14 @@ class ChatController():
     def initContextAll(self):
         for characterAI in self.characterAIs:
             characterAI.initContext()
-  
-    def addContextAll(self, role, message): # 発言を全員(自分も含める)の文脈に追加する
+
+    def addContextAll(self, role, message):  # 発言を全員(自分も含める)の文脈に追加する
         for characterAI in self.characterAIs:
             characterAI.addContext(role, message)
-    
+
     def getCharacterResponse(self, characterAI):
         return characterAI.getResponse()
-    
+
     def selectSpeaker(self):
         pre_speakerID = self.speakerID
         self.speakerID = random.randint(0, len(self.characterAIs)-1)
@@ -133,23 +142,25 @@ class ChatController():
             self.speakerID = pre_speakerID
             self.selectSpeaker()
         return self.characterAIs[self.speakerID]
-    
-    def getNextCharacterResponse(self): # 次のキャラクターの発言を取得し文脈に追加
+
+    def getNextCharacterResponse(self):  # 次のキャラクターの発言を取得し文脈に追加
         speaker = self.selectSpeaker()
         response = speaker.getResponse()
         self.addContextAll("user", response)
         print(response)
         self.addChatLog(response)
         return response
-    
+
     def makeChatLog(self):
         # すべての参加キャラの名前取得し、_でつなげる
-        self.attendants = [characterAI.characterName for characterAI in self.characterAIs]
+        self.attendants = [
+            characterAI.characterName for characterAI in self.characterAIs]
         allAttendants = '_'.join(self.attendants)
-        self.logFileName = time.strftime('%Y%m%d_%H%M%S', time.localtime()) + f'_({allAttendants}).txt'
+        self.logFileName = time.strftime(
+            '%Y%m%d_%H%M%S', time.localtime()) + f'_({allAttendants}).txt'
         with open(self.chatLogsDir / self.logFileName, 'a', encoding="utf-8") as f:
             f.write(f'{allAttendants}\n')
-    
+
     def addChatLog(self, response):
         with open(self.chatLogsDir / self.logFileName, 'a', encoding="utf-8") as f:
             f.write(f'{response}\n')
@@ -161,27 +172,27 @@ def main():
     metanAI = CharacterAI(LLM, "metan", contextDB_json)
     tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json)
     zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json)
-    
+
     characterAIs = [ryuseiAI, metanAI, tumugiAI, zundamonAI]
-    
+
     chatController = ChatController(characterAIs)
     chatController.initContextAll()
-    chatController.addContextAll('system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなゲームに関してトークしてください。適宜話題は変更してください。")
-    
+    chatController.addContextAll(
+        'system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなゲームに関してトークしてください。適宜話題は変更してください。")
 
-    for i in range(40):
+    for i in range(100):
         try:
             chatController.getNextCharacterResponse()
-            time.sleep(10)            
-            # if input("system input") == "s":
-            #     chatController.addContextAll('system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
+            time.sleep(10)
             
+            if i % 8 == 0:
+                chatController.addContextAll('system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
+            elif i % 4 == 0:
+                chatController.addContextAll('system', "[プロデューサーとしての発言]\n話の深堀をしてください。")
+
         except openai.error.RateLimitError:
             print("rate limit error")
             time.sleep(20)
-            
-
-
 
 
 if __name__ == '__main__':
