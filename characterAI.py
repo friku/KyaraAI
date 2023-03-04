@@ -86,12 +86,8 @@ class CharacterAI():
     
     def formatResponse(self, response):
         try:
-            # splitResponse = response["content"].split("\n")
-            # splitResponse = response["content"].split("としての発言]")
             splitResponse = re.split("としての発言]|\n", response["content"])
-            # thinkResponse = splitResponse[1]
             talkResponse = splitResponse[-1]
-            # formatResponse = f'[{self.characterName}としての発言]\n{thinkResponse}'
             formatResponse = f'[{self.characterName}としての発言]\n{talkResponse}'
         except:
             import pdb; pdb.set_trace()
@@ -144,16 +140,16 @@ class ChatController():
 
 def main():
     LLM = OpenAILLM()
-    ibrahimAI = CharacterAI(LLM, "ibrahim", contextDB_json)
-    saromeAI = CharacterAI(LLM, "sarome", contextDB_json)
-    sasakiAI = CharacterAI(LLM, "sasaki", contextDB_json)
-    oliverAI = CharacterAI(LLM, "oliver", contextDB_json)
+    ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json)
+    metanAI = CharacterAI(LLM, "metan", contextDB_json)
+    tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json)
+    zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json)
     
-    characterAIs = [ibrahimAI, saromeAI, sasakiAI, oliverAI]
+    characterAIs = [ryuseiAI, metanAI, tumugiAI, zundamonAI]
     
     chatController = ChatController(characterAIs)
     chatController.initContextAll()
-    chatController.addContextAll('user', "こんにちは~、最近ハマっているゲームに関する話で盛り上がりましょう！")
+    chatController.addContextAll('system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなゲームに関してトークしてください。")
     
 
     for i in range(10):
@@ -183,4 +179,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # test_contextDB_json()
