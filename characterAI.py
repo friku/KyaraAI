@@ -125,7 +125,11 @@ class ChatController():
         return characterAI.getResponse()
     
     def selectSpeaker(self):
+        pre_speakerID = self.speakerID
         self.speakerID = random.randint(0, len(self.characterAIs)-1)
+        if pre_speakerID == self.speakerID:
+            self.speakerID = pre_speakerID
+            self.selectSpeaker()
         return self.characterAIs[self.speakerID]
     
     def getNextCharacterResponse(self): # 次のキャラクターの発言を取得し文脈に追加
@@ -149,20 +153,13 @@ def main():
     
     chatController = ChatController(characterAIs)
     chatController.initContextAll()
-    chatController.addContextAll('system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなゲームに関してトークしてください。")
+    chatController.addContextAll('system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなゲームに関してトークしてください。適宜話題は変更してください。")
     
 
-    for i in range(10):
+    for i in range(40):
         try:
             chatController.getNextCharacterResponse()
-            time.sleep(10)
-            chatController.getNextCharacterResponse()
-            time.sleep(10)
-            chatController.getNextCharacterResponse()
-            time.sleep(10)
-            chatController.getNextCharacterResponse()
-            time.sleep(10)
-            
+            time.sleep(10)            
             # if input("system input") == "s":
             #     chatController.addContextAll('system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
             
