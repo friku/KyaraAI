@@ -163,17 +163,14 @@ def main():
             chatController.getNextCharacterResponse()
             time.sleep(10)
             
-            if input("system input") == "s":
-                chatController.addContextAll('system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
+            # if input("system input") == "s":
+            #     chatController.addContextAll('system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
             
         except openai.error.RateLimitError:
             print("rate limit error")
             time.sleep(20)
             
 
-
-        import pdb
-        pdb.set_trace()
 
 
 
