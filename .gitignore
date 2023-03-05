@@ -1,3 +1,5 @@
 characterConfig/**/context.json
 myCharacterConfig/**/*
 chatLogs/**
+**/*.pyc
+**/*.wav
