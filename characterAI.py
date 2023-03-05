@@ -16,6 +16,7 @@ import re
 import random
 from utils.voicevoxUtils import text2stream, makeWaveFile
 from utils.playWaveManager import WavQueuePlayer
+from utils.textEdit import remove_chars
 
 
 class OpenAILLM():
@@ -103,7 +104,8 @@ class CharacterAI():
         response = self.LLM.getResponce(prompt)
         formatResponse = self.formatResponse(response)["formatResponse"]
         talkResponse = self.formatResponse(response)["talkResponse"]
-        makeWaveFile(self.speakerID, talkResponse, Path(
+        cleanedTalkResponse = remove_chars(talkResponse, "「」 『』・") # 会話の中にある特殊文字を削除
+        makeWaveFile(self.speakerID, cleanedTalkResponse, Path(
             "./tmpWaveDir") / self.getFileName('wav'), self.speedSclae)
         return formatResponse
 
@@ -130,6 +132,7 @@ class CharacterAI():
         FileName = time.strftime(
             '%Y%m%d_%H%M%S', time.localtime()) + f'_({self.characterName}).{extention}'
         return FileName
+        
 
 
 class ChatController():
@@ -183,10 +186,10 @@ class ChatController():
 
 def main():
     LLM = OpenAILLM()
-    ryuseiAI = CharacterAI(LLM, "龍星", contextDB_json, 13, 1.3)
-    metanAI = CharacterAI(LLM, "めたん", contextDB_json, 6, 1.1)
-    tumugiAI = CharacterAI(LLM, "つむぎ", contextDB_json, 8, 1.1)
-    zundamonAI = CharacterAI(LLM, "ずんだもん", contextDB_json, 7, 1.1)
+    ryuseiAI = CharacterAI(LLM, "龍星", contextDB_json, 13, 1.2)
+    metanAI = CharacterAI(LLM, "めたん", contextDB_json, 6, 1.2)
+    tumugiAI = CharacterAI(LLM, "つむぎ", contextDB_json, 8, 1.2)
+    zundamonAI = CharacterAI(LLM, "ずんだもん", contextDB_json, 7, 1.2)
 
     characterAIs = [ryuseiAI, metanAI, tumugiAI, zundamonAI]
 
