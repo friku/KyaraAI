@@ -183,10 +183,10 @@ class ChatController():
 
 def main():
     LLM = OpenAILLM()
-    ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json, 13, 1.12)
-    metanAI = CharacterAI(LLM, "metan", contextDB_json, 6, 1.1)
-    tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json, 8, 1.1)
-    zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json, 7, 1.1)
+    ryuseiAI = CharacterAI(LLM, "龍星", contextDB_json, 13, 1.3)
+    metanAI = CharacterAI(LLM, "めたん", contextDB_json, 6, 1.1)
+    tumugiAI = CharacterAI(LLM, "つむぎ", contextDB_json, 8, 1.1)
+    zundamonAI = CharacterAI(LLM, "ずんだもん", contextDB_json, 7, 1.1)
 
     characterAIs = [ryuseiAI, metanAI, tumugiAI, zundamonAI]
 
