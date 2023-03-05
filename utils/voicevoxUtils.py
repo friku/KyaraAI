@@ -95,9 +95,11 @@ def synthesis2waveFile(synthesisRes: requests.Response, saveFilePath: Path) -> N
         f.write(synthesisRes.content)
 
 @fire_and_forget
-def makeWaveFile(speaker: int, text: str, saveFilePath: Path) -> None:
+def makeWaveFile(speaker: int, text: str, saveFilePath: Path, speedScale: float = 1.0) -> None:
     query = send_audio_query(speaker, text)
-    synthesisRes = synthesis(speaker, query.json())
+    query_dict = query.json()
+    query_dict['speedScale'] = speedScale
+    synthesisRes = synthesis(speaker, query_dict)
     synthesis2waveFile(synthesisRes, saveFilePath)
 
 
