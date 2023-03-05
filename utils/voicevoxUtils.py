@@ -2,9 +2,10 @@ import requests
 import json
 import pytest
 from pathlib import Path
-from playsound import playsound
+# from playsound import playsound
 import time
 import pyaudio # wavファイルを再生する
+
 
 
 
@@ -97,25 +98,22 @@ def makeWaveFile(speaker: int, text: str, saveFilePath: Path) -> None:
     query = send_audio_query(speaker, text)
     synthesisRes = synthesis(speaker, query.json())
     synthesis2waveFile(synthesisRes, saveFilePath)
-
-def text2stream(speaker: int, text: str, saveFilePath: Path) -> None:
-    makeWaveFile(speaker, text, saveFilePath)
-    playsound(saveFilePath)
     
-def text2stream(speaker: int, text: str, saveFilePath: Path) -> None:
-    query = send_audio_query(speaker, text)
-    synthesisRes = synthesis(speaker, query.json())
-    p = pyaudio.PyAudio()
+    
+def text2stream(speaker: int, text: str) -> None:
 
+    query = send_audio_query(speaker, text)
+
+    synthesisRes = synthesis(speaker, query.json())
+
+    p = pyaudio.PyAudio()
     # ストリームを開く
     stream = p.open(format=pyaudio.paInt16,  # 16ビット整数で表されるWAVデータ
                     channels=1,  # モノラル
                     rate=24000,  # サンプリングレート
                     output=True)
-
     # 再生を少し遅らせる（開始時ノイズが入るため）
     time.sleep(0.2) # 0.2秒遅らせる
-
     # WAV データを直接再生する
     stream.write(synthesisRes.content)  
 
@@ -128,8 +126,8 @@ def text2stream(speaker: int, text: str, saveFilePath: Path) -> None:
 
 
 def main():
-    # makeWaveFile(1, 'こんにちわ', Path('test2.wav'))
-    text2stream(1, 'こんにちわ', Path('test2.wav'))
+    text2stream(1, 'こんにちわ,わたしはずんだもんなのだ。よろしくなのだ')
+
 
 
 if __name__ == '__main__':
