@@ -69,7 +69,7 @@ class contextDB_json():
 
 
 class CharacterAI():
-    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json, speakerID: int):
+    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json, speakerID: int, speedScale: float = 1.0):
         self.LLM = LLM
         self.characterName = characterName
         self.contextPath = Path('./characterConfig') / \
@@ -82,6 +82,7 @@ class CharacterAI():
         if self.contextDB.get() == []:
             self.addIdentity(self.identityPath)
         self.speakerID = speakerID
+        self.speedSclae = speedScale
 
     def initContext(self):
         self.contextDB.init()
@@ -103,7 +104,7 @@ class CharacterAI():
         formatResponse = self.formatResponse(response)["formatResponse"]
         talkResponse = self.formatResponse(response)["talkResponse"]
         makeWaveFile(self.speakerID, talkResponse, Path(
-            "./tmpWaveDir") / self.getFileName('wav'))
+            "./tmpWaveDir") / self.getFileName('wav'), self.speedSclae)
         return formatResponse
 
     def addContext(self, role, message):
@@ -182,10 +183,10 @@ class ChatController():
 
 def main():
     LLM = OpenAILLM()
-    ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json, 1)
-    metanAI = CharacterAI(LLM, "metan", contextDB_json, 1)
-    tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json, 1)
-    zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json, 1)
+    ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json, 13, 1.12)
+    metanAI = CharacterAI(LLM, "metan", contextDB_json, 6, 1.1)
+    tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json, 8, 1.1)
+    zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json, 7, 1.1)
 
     characterAIs = [ryuseiAI, metanAI, tumugiAI, zundamonAI]
 
