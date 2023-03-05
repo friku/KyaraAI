@@ -7,7 +7,6 @@ import glob
 from utils.fire_and_forget import fire_and_forget
 
 
-
 class WavQueuePlayer:
     def __init__(self, directory: str = './tmpWaveDir'):
         """
@@ -30,14 +29,15 @@ class WavQueuePlayer:
         return len(self.file_queue)
 
     @fire_and_forget
-    def play(self,resident: bool = True, pause: float = 0.4):
+    def play(self, resident: bool = True, pause: float = 0.4):
         """
         ファイルキュー内の全てのWAVファイルを再生します。
 
         Args:
             pause (float, optional): 各ファイルの再生後に、一時停止する秒数。デフォルトは0.4秒。
         """
-        while resident:
+        self.resident = resident
+        while self.resident:
             self.update_file_queue()
             if len(self.file_queue) > 0:
                 file_path = self.file_queue.pop(0)
@@ -60,6 +60,9 @@ class WavQueuePlayer:
         """ディレクトリ内のすべての WAV ファイルを削除する"""
         for file_path in glob.glob(os.path.join(self.directory, '*.wav')):
             os.remove(file_path)
+    
+    def stop(self):
+        self.resident = False
 
 
 if __name__ == '__main__':

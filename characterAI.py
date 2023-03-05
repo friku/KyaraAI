@@ -102,7 +102,8 @@ class CharacterAI():
         response = self.LLM.getResponce(prompt)
         formatResponse = self.formatResponse(response)["formatResponse"]
         talkResponse = self.formatResponse(response)["talkResponse"]
-        makeWaveFile(self.speakerID, talkResponse, Path("./tmpWaveDir") / self.getFileName('wav'))
+        makeWaveFile(self.speakerID, talkResponse, Path(
+            "./tmpWaveDir") / self.getFileName('wav'))
         return formatResponse
 
     def addContext(self, role, message):
@@ -123,8 +124,8 @@ class CharacterAI():
 
     def text2speach(self, text: str):
         text2stream(self.speakerID, text)
-    
-    def getFileName(self, extention:str):
+
+    def getFileName(self, extention: str):
         FileName = time.strftime(
             '%Y%m%d_%H%M%S', time.localtime()) + f'_({self.characterName}).{extention}'
         return FileName
@@ -180,9 +181,6 @@ class ChatController():
 
 
 def main():
-    audioPlayer = WavQueuePlayer('./tmpWaveDir')
-    audioPlayer.play()
-
     LLM = OpenAILLM()
     ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json, 1)
     metanAI = CharacterAI(LLM, "metan", contextDB_json, 1)
@@ -214,4 +212,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        audioPlayer = WavQueuePlayer('./tmpWaveDir')
+        audioPlayer.play()
+        main()
+    except KeyboardInterrupt:
+        audioPlayer.stop()
