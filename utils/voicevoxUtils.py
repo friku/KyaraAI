@@ -3,8 +3,11 @@ import json
 import pytest
 from pathlib import Path
 import time
-from playsound import playsound
 import pdb
+import winsound
+import pydub
+from pydub.playback import play
+from utils.fire_and_forget import fire_and_forget
 
 
 def send_audio_query(speaker: int, text: str) -> requests.Response:
@@ -91,7 +94,7 @@ def synthesis2waveFile(synthesisRes: requests.Response, saveFilePath: Path) -> N
     with open(saveFilePath, mode='wb') as f:
         f.write(synthesisRes.content)
 
-
+@fire_and_forget
 def makeWaveFile(speaker: int, text: str, saveFilePath: Path) -> None:
     query = send_audio_query(speaker, text)
     synthesisRes = synthesis(speaker, query.json())
@@ -99,23 +102,24 @@ def makeWaveFile(speaker: int, text: str, saveFilePath: Path) -> None:
 
 
 def playWaveFile(filePath: Path) -> None:
-    try:
-        playsound(filePath)
-        return
-    except:
-        time.sleep(0.2)
-        playWaveFile(filePath)
+    for i in range(100):
+        try:
+            play(pydub.AudioSegment.from_wav("test.wav"))
+            return
+        except:
+            time.sleep(0.2)
 
-def text2stream(speaker: int, text: str, saveFilePath: Path) -> None:
+    print('再生に失敗しました。')
+
+
+def text2stream(speaker: int, text: str, saveFilePath: Path = Path('test.wav')) -> None:
     makeWaveFile(speaker, text, saveFilePath)
     playWaveFile(saveFilePath)
 
+
 def main():
-    # text2stream(1, 'こんにちわ,わたしはずんだもんなのだ。よろしくなのだ')
-    # makeWaveFile(1, 'こんにちわ,わたしはずんだもんなのだ。よろしくなのだ', Path('test.wav'))
-    # playsound("./test.wav")
-    text2stream(1, 'こんにちわ,わたしはずんだもんなのだ。よろしくなのだ', Path('test.wav'))
-    
+    # winsound.PlaySound("test.wav", winsound.SND_FILENAME)
+    play(pydub.AudioSegment.from_wav("test.wav"))
 
 
 if __name__ == '__main__':
