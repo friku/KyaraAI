@@ -57,7 +57,7 @@ class contextDB_json():
             json.dump(data, f, ensure_ascii=False)
 
     def get(self) -> list:
-        with open(self.filename) as f:
+        with open(self.filename,'r', encoding='utf-8_sig') as f:
             data = json.load(f)
             return data
 
