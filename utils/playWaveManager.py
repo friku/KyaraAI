@@ -3,16 +3,9 @@ import os
 import pydub
 from pydub.playback import play
 import time
-import asyncio
 import glob
+from utils.fire_and_forget import fire_and_forget
 
-
-def fire_and_forget(func):
-    def wrapper(*args, **kwargs):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop.run_in_executor(None, func, *args, *kwargs)
-    return wrapper
 
 
 class WavQueuePlayer:
@@ -37,14 +30,14 @@ class WavQueuePlayer:
         return len(self.file_queue)
 
     @fire_and_forget
-    def play(self, pause: float = 0.4):
+    def play(self,resident: bool = True, pause: float = 0.4):
         """
         ファイルキュー内の全てのWAVファイルを再生します。
 
         Args:
             pause (float, optional): 各ファイルの再生後に、一時停止する秒数。デフォルトは0.4秒。
         """
-        while True:
+        while resident:
             self.update_file_queue()
             if len(self.file_queue) > 0:
                 file_path = self.file_queue.pop(0)
