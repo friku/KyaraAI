@@ -14,6 +14,8 @@ import json
 import time
 import re
 import random
+from utils.voicevoxUtils import text2stream, makeWaveFile
+from utils.playWaveManager import WavQueuePlayer
 
 
 class OpenAILLM():
@@ -57,7 +59,7 @@ class contextDB_json():
             json.dump(data, f, ensure_ascii=False)
 
     def get(self) -> list:
-        with open(self.filename,'r', encoding='utf-8_sig') as f:
+        with open(self.filename, 'r', encoding='utf-8_sig') as f:
             data = json.load(f)
             return data
 
@@ -67,7 +69,7 @@ class contextDB_json():
 
 
 class CharacterAI():
-    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json):
+    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json, speakerID: int):
         self.LLM = LLM
         self.characterName = characterName
         self.contextPath = Path('./characterConfig') / \
@@ -79,6 +81,7 @@ class CharacterAI():
         self.contextDB = contextDBClass(self.contextPath)
         if self.contextDB.get() == []:
             self.addIdentity(self.identityPath)
+        self.speakerID = speakerID
 
     def initContext(self):
         self.contextDB.init()
@@ -92,12 +95,14 @@ class CharacterAI():
         except:
             import pdb
             pdb.set_trace()
-        return {"formatResponse": formatResponse}
+        return {"formatResponse": formatResponse, "talkResponse": talkResponse}
 
     def getResponse(self):
         prompt = self.makePrompt()
         response = self.LLM.getResponce(prompt)
         formatResponse = self.formatResponse(response)["formatResponse"]
+        talkResponse = self.formatResponse(response)["talkResponse"]
+        makeWaveFile(self.speakerID, talkResponse, Path("./tmpWaveDir") / self.getFileName('wav'))
         return formatResponse
 
     def addContext(self, role, message):
@@ -112,9 +117,17 @@ class CharacterAI():
         context = self.contextDB.get()
         if len(context) >= 20:
             prompt = context[0:2] + context[-18:]
-        else :
+        else:
             prompt = context
         return prompt
+
+    def text2speach(self, text: str):
+        text2stream(self.speakerID, text)
+    
+    def getFileName(self, extention:str):
+        FileName = time.strftime(
+            '%Y%m%d_%H%M%S', time.localtime()) + f'_({self.characterName}).{extention}'
+        return FileName
 
 
 class ChatController():
@@ -167,11 +180,14 @@ class ChatController():
 
 
 def main():
+    audioPlayer = WavQueuePlayer('./tmpWaveDir')
+    audioPlayer.play()
+
     LLM = OpenAILLM()
-    ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json)
-    metanAI = CharacterAI(LLM, "metan", contextDB_json)
-    tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json)
-    zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json)
+    ryuseiAI = CharacterAI(LLM, "ryusei", contextDB_json, 1)
+    metanAI = CharacterAI(LLM, "metan", contextDB_json, 1)
+    tumugiAI = CharacterAI(LLM, "tumugi", contextDB_json, 1)
+    zundamonAI = CharacterAI(LLM, "zundamon", contextDB_json, 1)
 
     characterAIs = [ryuseiAI, metanAI, tumugiAI, zundamonAI]
 
@@ -183,16 +199,18 @@ def main():
     for i in range(100):
         try:
             chatController.getNextCharacterResponse()
-            time.sleep(10)
-            
+            # time.sleep(10)
+
             if i % 8 == 0:
-                chatController.addContextAll('system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
+                chatController.addContextAll(
+                    'system', "[プロデューサーとしての発言]\n別の話題を提案して、話してください。")
             elif i % 4 == 0:
-                chatController.addContextAll('system', "[プロデューサーとしての発言]\n話の深堀をしてください。")
+                chatController.addContextAll(
+                    'system', "[プロデューサーとしての発言]\n話の深堀をしてください。")
 
         except openai.error.RateLimitError:
             print("rate limit error")
-            time.sleep(20)
+            time.sleep(5)
 
 
 if __name__ == '__main__':
