@@ -14,7 +14,7 @@ import json
 import time
 import re
 import random
-from utils.voicevoxUtils import text2stream, makeWaveFile
+from utils.voicevoxUtils import text2stream, makeWaveFile,voicevoxHelthCheck
 from utils.playWaveManager import WavQueuePlayer
 from utils.textEdit import remove_chars
 from utils.conversationRule import ConversationTimingChecker
@@ -186,6 +186,7 @@ class ChatController():
 
 
 def main():
+    if not voicevoxHelthCheck(): return
     try:
         audioPlayer = WavQueuePlayer('./tmpWaveDir')
         audioPlayer.play()

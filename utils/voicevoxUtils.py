@@ -7,7 +7,11 @@ import pdb
 import winsound
 import pydub
 from pydub.playback import play
-from utils.fire_and_forget import fire_and_forget
+
+if __name__ == '__main__':
+    from fire_and_forget import fire_and_forget
+else:
+    from utils.fire_and_forget import fire_and_forget
 
 
 def send_audio_query(speaker: int, text: str) -> requests.Response:
@@ -102,6 +106,16 @@ def makeWaveFile(speaker: int, text: str, saveFilePath: Path, speedScale: float 
     synthesisRes = synthesis(speaker, query_dict)
     synthesis2waveFile(synthesisRes, saveFilePath)
 
+def voicevoxHelthCheck() -> bool:
+    try:
+        url = 'http://localhost:50021/speakers'
+        response = requests.get(url, headers={'Content-Type': 'application/json'})
+        # print(response.text)
+        return True
+    except:
+        print("VoiceVoxが起動していません。")
+        return False
+
 
 def playWaveFile(filePath: Path) -> None:
     for i in range(100):
@@ -121,8 +135,11 @@ def text2stream(speaker: int, text: str, saveFilePath: Path = Path('test.wav')) 
 
 def main():
     # winsound.PlaySound("test.wav", winsound.SND_FILENAME)
-    play(pydub.AudioSegment.from_wav("test.wav"))
+    # play(pydub.AudioSegment.from_wav("test.wav"))
+    voicevoxHelthCheck()
+    # makeWaveFile(1, "こんにちわ", Path('test2.wav'))
 
 
 if __name__ == '__main__':
+    
     main()
