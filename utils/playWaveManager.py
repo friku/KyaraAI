@@ -4,7 +4,10 @@ import pydub
 from pydub.playback import play
 import time
 import glob
-from utils.fire_and_forget import fire_and_forget
+if __name__ == '__main__':
+    from fire_and_forget import fire_and_forget
+else:
+    from utils.fire_and_forget import fire_and_forget
 
 
 class WavQueuePlayer:
