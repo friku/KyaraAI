@@ -1,8 +1,8 @@
-import pygame
 import sys
 from pathlib import Path
 import random
 import time
+import cv2
 if __name__ == '__main__':
     from fire_and_forget import fire_and_forget
 else:
@@ -10,24 +10,19 @@ else:
 
 class TachieViewer:
     def __init__(self, imagesDirPath: Path):
-        self.pygameInit()
         self.getImages(imagesDirPath)
         self.image = self.closed_mouth_open_eye_image
         self.is_mouth_open = False
         self.is_eye_open = False
+
         
     
     def getImages(self, imagesDirPath: Path):
-        self.open_mouth_open_eye_image = pygame.image.load(imagesDirPath / 'om_oe.png').convert_alpha()
-        self.closed_mouth_open_eye_image = pygame.image.load(imagesDirPath / 'cm_oe.png').convert_alpha()
-        self.open_mouth_closed_eye_image = pygame.image.load(imagesDirPath / 'om_ce.png').convert_alpha()
-        self.closed_mouth_closed_eye_image = pygame.image.load(imagesDirPath / 'cm_ce.png').convert_alpha()
-        
-    def pygameInit(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((640, 640))
-        self.clock = pygame.time.Clock()
-        pygame.display.set_caption('Pygame Test')
+        self.open_mouth_open_eye_image = cv2.imread(str(imagesDirPath / 'om_oe.png'))
+        self.closed_mouth_open_eye_image = cv2.imread(str(imagesDirPath / 'cm_oe.png'))
+        self.open_mouth_closed_eye_image = cv2.imread(str(imagesDirPath / 'om_ce.png'))
+        self.closed_mouth_closed_eye_image = cv2.imread(str(imagesDirPath / 'cm_ce.png'))
+
         
     def setRandomBlinkFlag(self):
         # 乱数(1~100)で90以上なら目を閉じる
@@ -52,36 +47,33 @@ class TachieViewer:
             self.image = self.closed_mouth_open_eye_image
         elif not self.is_mouth_open and not self.is_eye_open:
             self.image = self.closed_mouth_closed_eye_image
-        
-        
-    def draw(self, surface):
-        surface.blit(self.image, (0, 0))
+
         
     @fire_and_forget
     def play(self):
         while True:
-            # for event in pygame.event.get():
-            #     if event.type == pygame.QUIT:
-            #         pygame.quit()
-            #         sys.exit()
-
+            key = cv2.waitKey(30)
             self.setRandomBlinkFlag()
-            # db = random.randint(1, 60)
-            # self.setMouthOpenFlag(db, 50)
             self.selectImage()
             
             # Draw character
-            self.draw(self.screen)
+            cv2.imshow('image', self.image)
             
-            # Update screen
-            pygame.display.flip()
-            self.clock.tick(30)
+            if key == 27 or key == ord('q') :
+                cv2.destroyAllWindows()
+                break
 
-imagesDirPath = Path('./characterConfig/りおん/images')
-tachieViewer = TachieViewer(imagesDirPath)
-tachieViewer.play()
 
-while True:
-    db = random.randint(1, 60)
-    tachieViewer.setMouthOpenFlag(db, 50)
-    time.sleep(1)
+def main():
+    imagesDirPath = Path('characterConfig/test/images')
+    tachieViewer = TachieViewer(imagesDirPath)
+    tachieViewer.play()
+
+    while True:
+        db = random.randint(1, 60)
+        tachieViewer.setMouthOpenFlag(db, 50)
+        print(tachieViewer.is_mouth_open, tachieViewer.is_eye_open)
+
+
+if __name__ == '__main__':
+    main()
