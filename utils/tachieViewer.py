@@ -15,6 +15,8 @@ from utils.fire_and_forget import fire_and_forget
 # 標準出力のエンコードをUTF-8に変更する
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+from utils.FlactuateImage import FlactuateImage
+
 
 class TachieViewer:
     def __init__(self, imagesDirPath: Path, windowName: str = 'TachieViewer'):
@@ -23,15 +25,15 @@ class TachieViewer:
         self.is_mouth_open = False
         self.is_eye_open = False
         self.windowName = windowName
+        self.flactuateImage = FlactuateImage()
+        self.closeFlag = False
 
-    
     
     def getImages(self, imagesDirPath: Path):
-        self.open_mouth_open_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'om_oe.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-        self.closed_mouth_open_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'cm_oe.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-        self.open_mouth_closed_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'om_ce.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-        self.closed_mouth_closed_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'cm_ce.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-
+        self.open_mouth_open_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'om_oe.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:,:,:3]
+        self.closed_mouth_open_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'cm_oe.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:,:,:3]
+        self.open_mouth_closed_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'om_ce.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:,:,:3]
+        self.closed_mouth_closed_eye_image = cv2.imdecode(np.fromfile(str(imagesDirPath / 'cm_ce.png'), dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:,:,:3]
 
         
     def setRandomBlinkFlag(self):
@@ -58,6 +60,8 @@ class TachieViewer:
         elif not self.is_mouth_open and not self.is_eye_open:
             self.image = self.closed_mouth_closed_eye_image
 
+    def close(self):
+        self.closeFlag = True
         
     @fire_and_forget
     def play(self):
@@ -66,10 +70,17 @@ class TachieViewer:
             self.setRandomBlinkFlag()
             self.selectImage()
             
+            # 画像の座標を拡張し、フレームごとに座標をずらす。
+            flactImage = self.flactuateImage.getImg(self.image)
+            
             # Draw character
-            cv2.imshow(self.windowName, self.image)
+            cv2.imshow(self.windowName, flactImage)
             
             if key == 27 or key == ord('q') :
+                cv2.destroyAllWindows()
+                break
+            
+            if self.closeFlag == True:
                 cv2.destroyAllWindows()
                 break
 
