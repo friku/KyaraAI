@@ -18,6 +18,7 @@ from utils.voicevoxUtils import text2stream, makeWaveFile,voicevoxHelthCheck
 from utils.playWaveManager import WavQueuePlayer
 from utils.textEdit import remove_chars
 from utils.conversationRule import ConversationTimingChecker
+from utils.wavePlayerWithVolume import WavPlayerWithVolume
 
 
 class OpenAILLM():
@@ -26,7 +27,8 @@ class OpenAILLM():
 
     def getResponce(self, context):
         responce = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            # model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-0301",
             messages=context
         )
         responce_message = responce["choices"][0]["message"]
@@ -71,13 +73,13 @@ class contextDB_json():
 
 
 class CharacterAI():
-    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json, speakerID: int, speedScale: float = 1.0):
+    def __init__(self, LLM, characterName: str, contextDBClass: contextDB_json, speakerID: int, speedScale: float = 1.0, fifoPlayer = None, TachieViewer = None, charaNameEN = 'test'):
         self.LLM = LLM
         self.characterName = characterName
-        self.contextPath = Path('./characterConfig') / \
-            characterName / 'context.json'
-        self.identityPath = Path('./characterConfig') / \
-            characterName / 'identity.txt'
+        self.charaNameEN = charaNameEN
+        self.characterDir = Path('./characterConfig') / characterName
+        self.contextPath = self.characterDir / 'context.json'
+        self.identityPath = self.characterDir / 'identity.txt'
         if not Path(f'./characterConfig/{characterName}').exists():
             assert False, f'キャラクターの設定ディレクトリが存在しません。{characterName}'
         self.contextDB = contextDBClass(self.contextPath)
@@ -85,6 +87,9 @@ class CharacterAI():
             self.addIdentity(self.identityPath)
         self.speakerID = speakerID
         self.speedSclae = speedScale
+        self.fifoPlayer = fifoPlayer
+        self.TachieViewer = TachieViewer
+        self.playTachieViewer()
 
     def initContext(self):
         self.contextDB.init()
@@ -102,14 +107,22 @@ class CharacterAI():
 
     def getResponse(self):
         prompt = self.makePrompt()
+        start = time.time()
         response = self.LLM.getResponce(prompt)
+        print(f"getResponce time: {time.time() - start}")
         formatResponse = self.formatResponse(response)["formatResponse"]
         talkResponse = self.formatResponse(response)["talkResponse"]
         cleanedTalkResponse = remove_chars(talkResponse, "「」 『』・") # 会話の中にある特殊文字を削除
-        makeWaveFile(self.speakerID, cleanedTalkResponse, Path(
-            "./tmpWaveDir") / self.getFileName('wav'), self.speedSclae)
+        wavPath =  Path("./tmpWaveDir") / self.getFileName('wav')
+        makeWaveFile(self.speakerID, cleanedTalkResponse,wavPath, self.speedSclae)
+        self.setVoiceObject(wavPath)
         return formatResponse
 
+    def setVoiceObject(self, wavPath:Path):
+        if self.fifoPlayer is None or self.tachieViewer is None:
+            return
+        self.fifoPlayer.setObject(WavPlayerWithVolume(wavPath, self.tachieViewer.setMouthOpenFlag))
+    
     def addContext(self, role, message):
         self.contextDB.add(role, message)
 
@@ -128,6 +141,14 @@ class CharacterAI():
 
     def text2speach(self, text: str):
         text2stream(self.speakerID, text)
+    
+    def playTachieViewer(self):
+        if self.TachieViewer is None:
+            return
+        self.tachieViewer = self.TachieViewer(self.characterDir / 'images', self.charaNameEN)
+        self.tachieViewer.play()
+        
+        
 
     def getFileName(self, extention: str):
         FileName = time.strftime(
