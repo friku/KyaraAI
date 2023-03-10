@@ -19,6 +19,7 @@ from utils.playWaveManager import WavQueuePlayer
 from utils.textEdit import remove_chars
 from utils.conversationRule import ConversationTimingChecker
 from utils.wavePlayerWithVolume import WavPlayerWithVolume
+from utils.TextReplacer import replace_words
 
 
 class OpenAILLM():
@@ -112,7 +113,10 @@ class CharacterAI():
         print(f"getResponce time: {time.time() - start}")
         formatResponse = self.formatResponse(response)["formatResponse"]
         talkResponse = self.formatResponse(response)["talkResponse"]
-        cleanedTalkResponse = remove_chars(talkResponse, "「」 『』・") # 会話の中にある特殊文字を削除
+        
+        cleanedTalkResponse = replace_words(talkResponse, 'dictionary.json')
+        cleanedTalkResponse = remove_chars(cleanedTalkResponse, "「」 『』・") # 会話の中にある特殊文字を削除
+        
         wavPath =  Path("./tmpWaveDir") / self.getFileName('wav')
         makeWaveFile(self.speakerID, cleanedTalkResponse,wavPath, self.speedSclae)
         self.setVoiceObject(wavPath)
@@ -133,8 +137,8 @@ class CharacterAI():
 
     def makePrompt(self):
         context = self.contextDB.get()
-        if len(context) >= 20:
-            prompt = context[0:2] + context[-18:]
+        if len(context) >= 18:
+            prompt = context[0:2] + context[-16:]
         else:
             prompt = context
         return prompt
@@ -148,8 +152,6 @@ class CharacterAI():
         self.tachieViewer = self.TachieViewer(self.characterDir / 'images', self.charaNameEN)
         self.tachieViewer.play()
         
-        
-
     def getFileName(self, extention: str):
         FileName = time.strftime(
             '%Y%m%d_%H%M%S', time.localtime()) + f'_({self.characterName}).{extention}'
@@ -224,7 +226,7 @@ def main():
         chatController = ChatController(characterAIs)
         chatController.initContextAll()
         chatController.addContextAll(
-            'system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなゲームに関してトークしてください。適宜話題は変更してください。")
+            'system', "[プロデューサーとしての発言]\nあなたたちはラジオ出演者です。好きなアーティストに関してトークしてください。適宜話題は変更してください。")
 
         for i in range(100):
             try:
@@ -241,6 +243,9 @@ def main():
 
             except openai.error.RateLimitError:
                 print("rate limit error")
+                time.sleep(5)
+            except openai.error.APIError:
+                print("API error")
                 time.sleep(5)
                 
     except KeyboardInterrupt:
