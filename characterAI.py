@@ -10,43 +10,22 @@
 import os
 import openai
 from pathlib import Path
+import pdb
 import json
 import time
 import re
 import random
 from utils.voicevoxUtils import text2stream, makeWaveFile,voicevoxHelthCheck
 from utils.playWaveManager import WavQueuePlayer
-from utils.textEdit import remove_chars
+from utils.textEdit import remove_chars, addText
 from utils.conversationRule import ConversationTimingChecker
 from utils.wavePlayerWithVolume import WavPlayerWithVolume
 from utils.TextReplacer import replace_words
+from utils.selectCharacter import find_string_positions
+from utils.chatRecorder import DictRecorder
+from utils.OpenAILLM import OpenAILLM
 
 
-class OpenAILLM():
-    def __init__(self, ):
-        openai.api_key = os.getenv("OPENAI_API_KEY")
-
-    def getResponce(self, context):
-        for i in range(20):
-            try:
-                responce = openai.ChatCompletion.create(
-                    # model="gpt-3.5-turbo",
-                    model="gpt-3.5-turbo-0301",
-                    messages=context
-                )
-                break
-            except openai.error.RateLimitError:
-                print("rate limit error")
-                time.sleep(5)
-            except openai.error.APIError:
-                print("API error")
-                time.sleep(5)
-        
-        
-        responce_message = responce["choices"][0]["message"]
-        responce_message = {
-            'role': responce_message["role"], 'content': responce_message["content"]}
-        return responce_message
 
 
 class contextDB_json():
@@ -121,25 +100,28 @@ class CharacterAI():
     def getResponse(self):
         prompt = self.makePrompt()
         start = time.time()
-        response = self.LLM.getResponce(prompt)
-        print(f"getResponce time: {time.time() - start}")
+        response = self.LLM.getResponse(prompt)
+        print(response)
+        print(f"getResponse time: {time.time() - start}")
         formatResponse = self.formatResponse(response)["formatResponse"]
         print(formatResponse)
         talkResponse = self.formatResponse(response)["talkResponse"]
         self.text2VoiceObject(talkResponse)
-        return formatResponse
+        return {'formatResponse':formatResponse, 'talkResponse':talkResponse, 'response':response}
     
-    def text2VoiceObject(self, text: str):
+    def text2VoiceObject(self, text: str, commentFlag = False):
         cleanedTalkResponse = replace_words(text, 'dictionary.json')
         cleanedTalkResponse = remove_chars(cleanedTalkResponse, "「」 『』・") # 会話の中にある特殊文字を削除
         wavPath =  Path("./tmpWaveDir") / self.getFileName('wav')
         makeWaveFile(self.speakerID, cleanedTalkResponse,wavPath, self.speedSclae) # 音声合成
-        self.setVoiceObject(wavPath, text) # 音声合成した音声をキューに追加
+        self.setVoiceObject(wavPath, text, commentFlag) # 音声合成した音声をキューに追加
     
 
-    def setVoiceObject(self, wavPath:Path, text = None):
+    def setVoiceObject(self, wavPath:Path, text = None, commentFlag = False):
         if self.fifoPlayer is None or self.tachieViewer is None:
             return
+        if commentFlag: # コメントの読み上げの場合は、テキストを表示しない
+            text = ''
         self.fifoPlayer.setObject(WavPlayerWithVolume(wavPath, self.tachieViewer.setMouthOpenFlag, text, self.characterName, self.yt_comment))
     
     def addContext(self, role, message):
@@ -152,8 +134,8 @@ class CharacterAI():
 
     def makePrompt(self):
         context = self.contextDB.get()
-        if len(context) >= 14:
-            prompt = context[0:2] + context[-12:]
+        if len(context) >= 10:
+            prompt = context[0:2] + context[-8:]
         else:
             prompt = context
         return prompt
@@ -179,38 +161,50 @@ class ChatController():
         self.characterAIs = characterAIs
         self.speakerID = 0
         self.chatLogsDir = Path('./chatLogs')
-        self.makeChatLog()
         self.latest_yt_comment = ''
+        self.attendants = [characterAI.characterName for characterAI in self.characterAIs]
+        self.makeChatLog()
+        self.systemContext = DictRecorder(Path('./tmpChatLog') / 'systemContext.json')
+        self.characterAIsDict = {characterAI.characterName:characterAI for characterAI in self.characterAIs}
 
     def initContextAll(self):
         for characterAI in self.characterAIs:
             characterAI.initContext()
 
-    def addContextAll(self, role, message):  # 発言を全員(自分も含める)の文脈に追加する
+    def addContextAll(self, role, message, speaker=''):  # 発言を全員(自分も含める)の文脈に追加する
         for characterAI in self.characterAIs:
             characterAI.addContext(role, message)
-        self.addChatLog(message)
+        addText(f'{message}\n', self.chatLogsDir / self.logFileName) # chatLogに発言を追加
+        self.systemContext.add({'role':role, 'content':message, 'speaker':speaker})
+        
     
     def addComment(self, role, message):
-        self.addContextAll(role, f'[コメント欄]\n{message}')
+        formatResponse = f'[コメント欄]\n{message}'
+        self.addContextAll(role, formatResponse, speaker='コメント欄')
         self.latest_yt_comment = message
-        
         
 
     def getCharacterResponse(self, characterAI):
         characterAI.yt_comment = self.latest_yt_comment
+        if characterAI.yt_comment != '':
+            characterAI.text2VoiceObject(characterAI.yt_comment, commentFlag=True)
+        self.latest_yt_comment = ''
         response = characterAI.getResponse()
-        self.addContextAll("user", response)
         characterAI.yt_comment = ''
+        self.addContextAll("user", response['formatResponse'], speaker=characterAI.characterName)
         return response
     
     def postCharacterChat(self, characterAI, message):
         characterAI.text2VoiceObject(message)
         response = f'[{characterAI.characterName}としての発言]\n{message}'
-        self.addContextAll("user", response)
+        self.addContextAll("user", response, speaker=characterAI.characterName)
 
 
     def selectSpeaker(self):
+        calledSpeaker = self.getCalledSpeaker()
+        if calledSpeaker is not None:
+            return calledSpeaker
+
         pre_speakerID = self.speakerID
         self.speakerID = random.randint(0, len(self.characterAIs)-1)
         if pre_speakerID == self.speakerID:
@@ -224,18 +218,24 @@ class ChatController():
         return response
 
     def makeChatLog(self):
+        #　会話内容を記録するファイルを作成
         # すべての参加キャラの名前取得し、_でつなげる
-        self.attendants = [
-            characterAI.characterName for characterAI in self.characterAIs]
         allAttendants = '_'.join(self.attendants)
         self.logFileName = time.strftime(
             '%Y%m%d_%H%M%S', time.localtime()) + f'_({allAttendants}).txt'
-        with open(self.chatLogsDir / self.logFileName, 'a', encoding="utf-8") as f:
-            f.write(f'{allAttendants}\n')
-
-    def addChatLog(self, response):
-        with open(self.chatLogsDir / self.logFileName, 'a', encoding="utf-8") as f:
-            f.write(f'{response}\n')
+        addText(f'{allAttendants}\n', self.chatLogsDir / self.logFileName) # chatLogに参加者名を追加
+    
+    def getLastContext(self):
+        return self.systemContext.get()[-1]
+    
+    def getCalledSpeaker(self):
+        lastContext = self.systemContext.get_last()
+        nextSpeakerName = find_string_positions(lastContext['content'], self.attendants, lastContext['speaker'])
+        if nextSpeakerName is None:
+            return None
+        nextSpeaker = self.characterAIsDict[nextSpeakerName['first_word']]
+        return nextSpeaker
+        
 
 
 def main():

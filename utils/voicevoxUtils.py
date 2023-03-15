@@ -31,7 +31,7 @@ def send_audio_query(speaker: int, text: str) -> requests.Response:
         POSTリクエストのレスポンスを表すrequests.Responseオブジェクト。
     """
     # リクエストヘッダーの情報を定義
-    url = 'http://localhost:50021/audio_query'
+    url = 'http://127.0.0.1:50021/audio_query'
     headers = {'Content-Type': 'application/json'}
 
     # リクエストパラメータの情報を定義
@@ -78,7 +78,7 @@ def synthesis(speaker: int, audio_query: dict) -> requests.Response:
         POSTリクエストのレスポンスを表すrequests.Responseオブジェクト。
     """
     # リクエストヘッダーの情報を定義
-    url = 'http://localhost:50021/synthesis'
+    url = 'http://127.0.0.1:50021/synthesis'
     headers = {'Content-Type': 'application/json'}
 
     # リクエストパラメータの情報を定義
@@ -100,11 +100,14 @@ def synthesis2waveFile(synthesisRes: requests.Response, saveFilePath: Path) -> N
 
 @fire_and_forget
 def makeWaveFile(speaker: int, text: str, saveFilePath: Path, speedScale: float = 1.0) -> None:
+    start = time.time()
     query = send_audio_query(speaker, text)
     query_dict = query.json()
     query_dict['speedScale'] = speedScale
+    print(time.time() - start)
     synthesisRes = synthesis(speaker, query_dict)
     synthesis2waveFile(synthesisRes, saveFilePath)
+    print(time.time() - start)
 
 def voicevoxHelthCheck() -> bool:
     try:
@@ -136,8 +139,10 @@ def text2stream(speaker: int, text: str, saveFilePath: Path = Path('test.wav')) 
 def main():
     # winsound.PlaySound("test.wav", winsound.SND_FILENAME)
     # play(pydub.AudioSegment.from_wav("test.wav"))
-    voicevoxHelthCheck()
-    # makeWaveFile(1, "こんにちわ", Path('test2.wav'))
+    # voicevoxHelthCheck()
+    
+    makeWaveFile(1, "こんにちわ", Path('test2.wav'))
+    
 
 
 if __name__ == '__main__':

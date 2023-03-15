@@ -1,7 +1,7 @@
 import time
 
 class ConversationTimingChecker:
-    def __init__(self, threshold: int = 3):
+    def __init__(self, threshold: int = 1):
         self.threshold = threshold
 
     def check_conversation_timing(self, num_conversations: int) -> bool:

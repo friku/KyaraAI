@@ -1,3 +1,4 @@
+from pathlib import Path
 
 
 def remove_chars(text, chars_to_remove):
@@ -14,3 +15,10 @@ def remove_chars(text, chars_to_remove):
     for char in chars_to_remove:
         text = text.replace(char, "")
     return text
+
+
+def addText(response:str, textPath:Path, encoding="utf-8", mode='a') -> None:
+    with open(textPath, mode, encoding=encoding) as f:
+        f.write(f'{response}\n')
+
+
