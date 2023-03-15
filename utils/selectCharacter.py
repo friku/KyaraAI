@@ -1,4 +1,5 @@
 import pdb
+import random
 
 def find_string_positions(text, words, removeWords=[]):
     """テキスト内からlistに入った文字列が存在するか判定し、存在する場合、各文字列ごとに位置を返却する関数。
@@ -35,6 +36,23 @@ def remove_matching_strings(a_list, b_list):
 
 
 
+def select_random_next_character(pre_speaker:str, participants:dict) -> dict:
+    """
+    次に喋るキャラクターをランダムに選択する。
+    """
+    # すでに喋ったキャラクターを除外する
+    #pre_speakerに一致するキーのparticipantsを削除する
+    candidates = remove_matching_strings(list(participants.keys()), [pre_speaker])
+    # 候補が残っている場合、ランダムに選択する
+    next_speaker_name = random.choice(candidates) if len(candidates) > 0 else pre_speaker
+    next_speaker = participants[next_speaker_name]
+    next_speaker_dict = {'name':next_speaker_name,'speaker':next_speaker}
+    
+    return next_speaker_dict
+    
+
+
+
 def main():
     text = "ねえ、ルミネス。あなたはどうしてネオンを助けたの？"
     words = ["ネオン", "ルミネス", "ラン", "cat"]
@@ -43,3 +61,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    next_spkeaker = select_random_next_character("ルミネス", {"ルミネス":"ルミネス1", "ネオン":"ネオン1", "ラン":"ラン1", "cat":"cat1"})
+    print(next_spkeaker)

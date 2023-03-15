@@ -20,7 +20,7 @@ def main():
     if not voicevoxHelthCheck():
         return
     try:
-        yt_url = 'https://www.youtube.com/watch?v=OcuwIJrZy3k' # youtubeのURL
+        yt_url = 'https://www.youtube.com/watch?v=Nczg1zo6XyQ' # youtubeのURL
         youtubeChat = YTComment(yt_url)
         
         # キャラクターがwavファイルを作成する
@@ -60,15 +60,15 @@ def main():
                 conversationTimingChecker.check_conversation_timing_with_delay(
                     fifoPlayer.get_file_queue_length)
                 
-                while True:
-                    latestChat = youtubeChat.get_comment()
-                    print(latestChat)
+                # while True:
+                #     latestChat = youtubeChat.get_comment()
+                #     print(latestChat)
                     
-                    if latestChat is not None:
-                        break
-                    time.sleep(1)
+                #     if latestChat is not None:
+                #         break
+                #     time.sleep(1)
 
-                # latestChat = youtubeChat.get_comment()
+                latestChat = youtubeChat.get_comment()
                 if latestChat is not None:
                     latestMsg = latestChat["message"]
                     chatController.addComment( 'system', f"{latestMsg}")

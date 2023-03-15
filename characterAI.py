@@ -21,7 +21,7 @@ from utils.textEdit import remove_chars, addText
 from utils.conversationRule import ConversationTimingChecker
 from utils.wavePlayerWithVolume import WavPlayerWithVolume
 from utils.TextReplacer import replace_words
-from utils.selectCharacter import find_string_positions
+from utils.selectCharacter import find_string_positions, select_random_next_character
 from utils.chatRecorder import DictRecorder
 from utils.OpenAILLM import OpenAILLM
 
@@ -159,7 +159,7 @@ class CharacterAI():
 class ChatController():
     def __init__(self, characterAIs: list):
         self.characterAIs = characterAIs
-        self.speakerID = 0
+        self.speakerName = ''
         self.chatLogsDir = Path('./chatLogs')
         self.latest_yt_comment = ''
         self.attendants = [characterAI.characterName for characterAI in self.characterAIs]
@@ -205,12 +205,14 @@ class ChatController():
         if calledSpeaker is not None:
             return calledSpeaker
 
-        pre_speakerID = self.speakerID
-        self.speakerID = random.randint(0, len(self.characterAIs)-1)
-        if pre_speakerID == self.speakerID:
-            self.speakerID = pre_speakerID
-            self.selectSpeaker()
-        return self.characterAIs[self.speakerID]
+        pre_speakerName = self.speakerName
+        nextSpeakerDict  = select_random_next_character(pre_speakerName, self.characterAIsDict)
+        self.speakerName = nextSpeakerDict['name']
+        print(pre_speakerName,self.speakerName)
+        # pdb.set_trace()
+        nextSpeaker = nextSpeakerDict['speaker']
+        return nextSpeaker
+        
 
     def getNextCharacterResponse(self):  # 次のキャラクターの発言を取得し文脈に追加
         speaker = self.selectSpeaker()
@@ -233,7 +235,8 @@ class ChatController():
         nextSpeakerName = find_string_positions(lastContext['content'], self.attendants, lastContext['speaker'])
         if nextSpeakerName is None:
             return None
-        nextSpeaker = self.characterAIsDict[nextSpeakerName['first_word']]
+        self.speakerName = nextSpeakerName['first_word']
+        nextSpeaker = self.characterAIsDict[self.speakerName]
         return nextSpeaker
         
 
