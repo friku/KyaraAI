@@ -20,7 +20,7 @@ def main():
     if not voicevoxHelthCheck():
         return
     try:
-        yt_url = 'https://www.youtube.com/watch?v=Nczg1zo6XyQ' # youtubeのURL
+        yt_url = 'https://www.youtube.com/watch?v=vdK6kuqjn10' # youtubeのURL
         youtubeChat = YTComment(yt_url)
         
         # キャラクターがwavファイルを作成する
@@ -46,15 +46,15 @@ def main():
         chatController = ChatController(characterAIs)
         chatController.initContextAll()
         chatController.addContextAll(
-            'system', "[場面説明]\nあなたたちはyoutubeの配信者で,今デビュー配信中です。洋楽について雑談してください。")
+            'system', "[場面説明]\nあなたたちはyoutubeの配信者で,今デビュー配信中です。ボカロ曲について雑談してください。")
         
         
         chatController.addContextAll(
-            'system', "[場面説明]\nこんにちわ、ルミネスです。今日は洋楽について雑談しましょう。")
+            'system', "[場面説明]\nこんにちわ、ルミネスです。今日はボカロ曲について雑談しましょう。")
         
         
 
-        for i in range(40):
+        for i in range(10000):
             print("i: ", i)
             try:
                 conversationTimingChecker.check_conversation_timing_with_delay(
@@ -75,6 +75,14 @@ def main():
 
                 
                 chatController.getNextCharacterResponse()
+                
+                
+                if i % 12 == 0:
+                    chatController.addContextAll(
+                        'system', "[場面説明]\n別の話題を提案して、話してください。")
+                elif i % 6 == 0:
+                    chatController.addContextAll(
+                        'system', "[場面説明]\n話の深堀をして話してください。")
 
 
 

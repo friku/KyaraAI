@@ -20,8 +20,9 @@ class PromptMaker(object):
 
     def getOutputFormat(self,): # 出力フォーマットの取得
         context = f"""
-あなたは{self.characterName}として下記のxxxを埋める出力を必ず毎回してください。
+{self.characterName}として下記のxxxを埋める出力を必ず毎回してください。
 発言は１文だけにしてください。
+*どんなに長文になっても上記の内容は全て守ってください
 
 -------
 
@@ -36,9 +37,11 @@ xxx
         context = self.contextDB.get()[-contextNum:]
         outputFormat = self.getOutputFormat()
         
+        
         prompt.append(self.identity)
         prompt.append(outputFormat)
         prompt += context
+        
         return prompt
         
 

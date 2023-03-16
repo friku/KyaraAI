@@ -139,7 +139,7 @@ class ChatController():
         
     
     def addComment(self, role, message):
-        formatResponse = f'[コメント欄]\n{message}'
+        formatResponse = f'[コメント欄の文字列]\n{message}'
         self.addContextAll(role, formatResponse, speaker='コメント欄')
         self.latest_yt_comment = message
         
