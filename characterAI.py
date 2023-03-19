@@ -64,8 +64,8 @@ class CharacterAI():
             pdb.set_trace()
         return {"formatResponse": formatResponse, "talkResponse": talkResponse}
 
-    def getResponse(self):
-        prompt = self.promptMaker.getPrompt()
+    def getResponse(self, outputNum:int = 20):
+        prompt = self.promptMaker.getPrompt(outputNum=outputNum)
         start = time.time()
         response = self.LLM.getResponse(prompt)
         print(response)
@@ -144,12 +144,12 @@ class ChatController():
         self.latest_yt_comment = message
         
 
-    def getCharacterResponse(self, characterAI):
+    def getCharacterResponse(self, characterAI, outputNum:int = 20):
         characterAI.yt_comment = self.latest_yt_comment
         if characterAI.yt_comment != '':
             characterAI.text2VoiceObject(characterAI.yt_comment, commentFlag=True)
         self.latest_yt_comment = ''
-        response = characterAI.getResponse()
+        response = characterAI.getResponse(outputNum)
         characterAI.yt_comment = ''
         self.addContextAll("user", response['formatResponse'], speaker=characterAI.characterName)
         return response
@@ -174,9 +174,9 @@ class ChatController():
         return nextSpeaker
         
 
-    def getNextCharacterResponse(self):  # 次のキャラクターの発言を取得し文脈に追加
+    def getNextCharacterResponse(self, outputNum:int = 20):  # 次のキャラクターの発言を取得し文脈に追加
         speaker = self.selectSpeaker()
-        response = self.getCharacterResponse(speaker)
+        response = self.getCharacterResponse(speaker, outputNum)
         return response
 
     def makeChatLog(self):
@@ -226,7 +226,7 @@ def main():
         for i in range(100):
             try:
                 conversationTimingChecker.check_conversation_timing_with_delay(audioPlayer.get_file_queue_length)
-                chatController.getNextCharacterResponse()
+                chatController.getNextCharacterResponse(outputNum = 30)
                 # time.sleep(10)
 
                 if i % 8 == 0:

@@ -23,9 +23,6 @@ def main():
         yt_url = 'https://www.youtube.com/watch?v=vdK6kuqjn10' # youtubeのURL
         youtubeChat = YTComment(yt_url)
         
-        # キャラクターがwavファイルを作成する
-        # キャラクターのwavファイルを順番に再生する
-        # 立ち絵を動かす
         fifoPlayer = FIFOPlayer()
         fifoPlayer.playWithFIFO()
 
