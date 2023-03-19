@@ -1,3 +1,6 @@
 characterConfig/**/context.json
 myCharacterConfig/**/*
 chatLogs/**
+tmpWaveDir/**
+**/*.pyc
+
