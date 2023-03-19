@@ -22,7 +22,7 @@ def main():
     try:
         yt_url = 'https://www.youtube.com/watch?v=vdK6kuqjn10' # youtubeのURL
         youtubeChat = YTComment(yt_url)
-        
+
         fifoPlayer = FIFOPlayer()
         fifoPlayer.playWithFIFO()
 
@@ -47,13 +47,13 @@ def main():
             'system', "[場面説明]\nあなたたちはいまディストピア短編小説を考えています。ディストピア短編小説のテーマについてアイディア出しをしてください。")
         # chatController.addContextAll(
         #     'system', "[]\nあなたのワードは「トマト」です。")
-        
+
 
 
         try:
             conversationTimingChecker.check_conversation_timing_with_delay(
                 fifoPlayer.get_file_queue_length)
-            
+
             chatController.postCharacterChat(ranAI, "はいどうもこんにちは！KyaraAI所属AITuberの花京院ランです！")
             time.sleep(1)
             chatController.postCharacterChat(ruminesAI, "ルミネスだ！")
@@ -71,7 +71,7 @@ def main():
             chatController.postCharacterChat(ruminesAI, "対戦よろしくたのむ")
             time.sleep(3)
 
-       
+
 
 
 
@@ -82,7 +82,7 @@ def main():
             print("API error")
             time.sleep(5)
         print("end")
-    
+
     except KeyboardInterrupt:
         pass
 

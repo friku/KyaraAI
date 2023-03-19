@@ -22,7 +22,7 @@ def main():
     try:
         yt_url = 'https://www.youtube.com/watch?v=vdK6kuqjn10' # youtubeのURL
         youtubeChat = YTComment(yt_url)
-        
+
         fifoPlayer = FIFOPlayer()
         fifoPlayer.playWithFIFO()
 
@@ -44,36 +44,36 @@ def main():
         chatController.initContextAll()
         chatController.addContextAll(
             'system', "[場面説明]\n「人生で大切なのはお金か愛情か。」このテーマでディベートを行います。")
-        
+
 
 
         try:
             conversationTimingChecker.check_conversation_timing_with_delay(
                 fifoPlayer.get_file_queue_length)
 
-            
+
             chatController.addContextAll('system', "[場面説明]\nあなたは「お金」派です。お金が大切な理由を段階的かつ論理的に考えて発言してください。")
             chatController.getNextCharacterResponse(outputNum = 50)
-            
+
             chatController.addContextAll('system', "[場面説明]\nあなたは「愛情」派です。愛情が大切な理由を段階的かつ論理的に考えて発言してください。")
             chatController.getNextCharacterResponse(outputNum = 50)
-        
+
             chatController.addContextAll('system', "[場面説明]\nこれまでに出た情報を統合的に考慮して、愛情派の意見に反論し、愛情よりお金が大切な理由を段階的かつ論理的に考えて発言してください。")
             chatController.getNextCharacterResponse(outputNum = 100)
             chatController.addContextAll('system', "[場面説明]\nこれまでに出た情報を統合的に考慮して、お金派の意見に反論し、お金より愛情が大切な理由を段階的かつ論理的に考えて発言してください。")
             chatController.getNextCharacterResponse(outputNum = 100)
-        
+
             chatController.addContextAll('system', "[場面説明]\nこれまでに出た情報を統合的に考慮して、愛情派の意見に徹底的に反論し、愛情よりお金が大切な理由を論理的に考えて発言してください。")
             chatController.getNextCharacterResponse(outputNum = 200)
-            
+
             chatController.addContextAll('system', "[場面説明]\nこれまでに出た情報を統合的に考慮して、お金派の意見に徹底的に反論し、お金より愛情が大切な理由を論理的に考えて発言してください。")
             chatController.getNextCharacterResponse(outputNum = 200)
-            
+
             chatController.addContextAll('system', "[場面説明]\nお金派として意見をまとめてください。")
             chatController.getNextCharacterResponse(outputNum = 100)
             chatController.addContextAll('system', "[場面説明]\n愛情として意見をまとめてください。")
             chatController.getNextCharacterResponse(outputNum = 100)
-            
+
 
 
 
@@ -84,7 +84,7 @@ def main():
             print("API error")
             time.sleep(5)
         print("end")
-    
+
     except KeyboardInterrupt:
         pass
 
