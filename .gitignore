@@ -3,3 +3,7 @@ myCharacterConfig/**/*
 chatLogs/**
 **/*.pyc
 **/*.wav
+characterConfig/
+tmpChatLog/
+tmpTextDir/
+tmpWaveDir/
