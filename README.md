@@ -77,6 +77,7 @@ https://github.com/friku/KyaraAI/blob/a25e0c822439e1a0972aae98d5873825f85177e1/u
 - [ ] Talking Head Animeへの対応
 - [ ] 長期記憶の実装
 - [ ] Koeiromapへの対応
+機能の要望があればissueでお知らせください。
 
 
 機能の要望があればissueでお知らせください。
