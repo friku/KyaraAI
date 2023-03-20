@@ -1,66 +1,82 @@
 # KyaraAI
-複数のキャラクターAIに会話していただくためのリポジトリです。
+誰でも簡単に複数のキャラクターAIの開発、運用、配信をできるようにするためのリポジトリです。
 
 
-# Feature
-複数の人格と記憶を持ったキャラクターを作成
+# 機能
+複数の人格と記憶を持ったキャラクターを作成<br>
 複数キャラが会話するためのコントロールシステムを作成
 - 他のキャラの発言を記憶
 - 発言の順番をコントロール
 - systemロールの発言を全員に記憶させる
 
-# setup
-python >= 3.6
-openai >= 0.27.0
+VOICEVOXによる会話の読み上げ<br>
+会話順に沿った音声の再生機能<br>
+キャラクターの立ち絵を表示、自動瞬き機能、自動口パク機能<br>
+発話の文字数調整機能<br>
+OBSとの連携
+- Youtubeのコメントを表示
+- キャラの発言を表示
+- 発言キャラ名を表示
 
-pythonとopenaiが入っていれば動きます。
+
+# requirements
+Windows11を推奨(動作確認済み)<br>
+(Ubuntu22.04で動作検証した場合、立ち絵が表示されないバグを確認)
+
+環境構築
+anacondaで仮想環境を作成
+```
+conda create -n kyara python=3.9 anaconda
+conda activate kyara
+git clone git@github.com:friku/KyaraAI.git
+pip install -r requirements.txt
+```
+
+VOICEVOXのインストール<br>
+https://voicevox.hiroshiba.jp/<br>
+VOICEVOXをインストールし起動してください。(VOICEVOXはGUIを起動すると自動的に、APIサーバーが立ち上がります。KyaraAIではVOICEVOXのAPIを利用しています。)
+
+OPENAIのAPIキーを環境変数に追加する。<br>
+https://platform.openai.com/account/api-keys<br>
+でAPIキーを作成します。
+WINDOWSの場合、「環境変数の設定」で環境変数名を「OPENAI_API_KEY」とし、変数値に作成したAPIキーを登録します。
 
 # quick start
-set openai API key
+下記のコマンドを実行します。
 ```
-export OPENAI_API_KEY=<your openai api key>
-git clone git@github.com:friku/KyaraAI.git
-cd KyaraAI
-python characterAI.py
+python commandDebugTalk.py
 ```
+キャラクターの立ち絵画面が4枚表示され、各キャラクターのボイスが出力されれば正常に動作しています。
 
 # 会話に参加するキャラクターを選ぶ
-https://github.com/friku/KyaraAI/blob/82f167d0a858f5c32e0af02647b7d0cb43e0997a/characterAI.py#L148
-この行の上で作成されたキャラクターをcharacterAIsのリストに入れてください。
+https://github.com/friku/KyaraAI/blob/a25e0c822439e1a0972aae98d5873825f85177e1/commentDebugTalk.py#L42
+この行のように作成されたキャラクターをcharacterAIsのリストに入れてください。
 
 
 # 独自の人格を持ったキャラクターAIを作る
-キャラクターの人格に関する情報は
-characterConfig/<character name>/identity.txt
-の中に記述してください。
-ここがキャラクターに最初に伝えるプロンプトとなります。
-
-# 発言の形式を調整する。
-出力は単純に発言のみを出力させるより、感情パラメータや思考を出力させてから、実際の発言をさせたほうがより良い発言になることがあります。(CoT)
-そのため、ほかのキャラクターに伝える前に出力から実際の発言に変換する必要があります。
-デフォルトでは下記の形式を前提として、`[<character Name>の発言]`の後のみを出力するように変換しています。
-```
-[<character Name>の心の声]
-xxx
-
-[<character Name>の発言]
-xxx
-```
-この変換方法はプロンプトによって変わるので、変更したい場合は、
-https://github.com/friku/KyaraAI/blob/82f167d0a858f5c32e0af02647b7d0cb43e0997a/characterAI.py#L87
-を修正してください。
+キャラクターに関する情報は
+characterConfig/<character name>
+にあります。このディレクトリにはキャラクターの設定を記述するidentity.txtとキャラクターの立ち絵画像を入れるimagesディレクトリをおいてください。また、コードを実行するとキャラクターの記憶となるcontext.jsonが生成されます。
 
 
-# キャラクターに伝えられるプロンプトの説明
-キャラクターが返答する際には、characterConfig/<character name>/context.jsonの中身がプロンプトとして用いられます。
-jsonの各要素はchatGPTに渡すmessageです。
-一番最初の要素に各キャラクタのidentitiy.txtファイルの中身がmessageとして入っており、それ以降に発言が入ります。
-他のキャラや自キャラが発言するたびにこのファイルに追加されます。
+# プロンプトの設定
+プロンプトは
+https://github.com/friku/KyaraAI/blob/a25e0c822439e1a0972aae98d5873825f85177e1/utils/PromptMaker.py#L11
+で作成されます。<br>
+デフォルトではプロンプトは下記の構成となっております。<br>
+- キャラ設定
+- f"下記はここまでの会話です\n"
+- 直前の会話以外の会話履歴(直近の会話を除く)
+- キャラの出力フォーマット指定
+- f"下記は直前の会話です。\n*{self.characterName}として必ず20字以内で発言すること!\n"
+- 直前の会話文
+
 
 
 # Future work
-- [ ] トークン数が4096を超えないようにする。
-- [ ] 長期記憶を持つ
+- [ ] Talking Head Animeへの対応
+- [ ] 長期記憶の実装
+- [ ] Koeiromapへの対応
 
 
 
