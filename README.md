@@ -78,6 +78,9 @@ https://github.com/friku/KyaraAI/blob/a25e0c822439e1a0972aae98d5873825f85177e1/u
 - [ ] 長期記憶の実装
 - [ ] Koeiromapへの対応
 
+
+機能の要望があればissueでお知らせください。
+
 # ライセンス
 このコードはMIT licenseで提供されています。ただし、characterConfigディレクトリの中の画像ファイル、テキストファイル、jsonファイルはMIT licenseではありません。ただ、開発やデバッグ用のサンプルデータとして使用することは可能です。
 
