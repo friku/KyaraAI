@@ -1,6 +1,7 @@
 import json
-from characterAI import contextDB_json
 from pathlib import Path
+
+from characterAI import contextDB_json
 
 
 def test_contextDB_json():

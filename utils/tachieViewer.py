@@ -1,19 +1,22 @@
-import sys
-from pathlib import Path
+import os
 import random
-import time
-import cv2
-import numpy as np
 # if __name__ == '__main__':
 #     from fire_and_forget import fire_and_forget
 # else:
 #     from utils.fire_and_forget import fire_and_forget
 import sys
-import os
+import time
+from pathlib import Path
+
+import cv2
+import numpy as np
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from utils.fire_and_forget import fire_and_forget
 # 標準出力のエンコードをUTF-8に変更する
 import io
+
+from utils.fire_and_forget import fire_and_forget
+
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 from utils.FlactuateImage import FlactuateImage
 

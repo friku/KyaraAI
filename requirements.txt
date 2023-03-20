@@ -1,2 +1,6 @@
 openai
 pytest
+pydub
+opencv-python
+pyaudio
+pytchat

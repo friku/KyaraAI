@@ -1,5 +1,6 @@
 import time
 
+
 class ConversationTimingChecker:
     def __init__(self, threshold: int = 1):
         self.threshold = threshold

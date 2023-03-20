@@ -1,6 +1,7 @@
 import glob
 import re
 
+
 def extract_english(text):
     # 英語の正規表現パターンを定義する
     pattern = r'[a-zA-Z]+'

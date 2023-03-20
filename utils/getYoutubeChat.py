@@ -1,9 +1,9 @@
-import time
-import requests
 import json
 import os
+import time
 from pathlib import Path
 
+import requests
 
 # 事前に取得したYouTube API key
 YT_API_KEY = os.environ['YT_API_KEY']

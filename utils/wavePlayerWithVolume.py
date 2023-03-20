@@ -1,14 +1,17 @@
-from pathlib import Path
-from utils.tachieViewer import TachieViewer
-import pyaudio
-import wave
-import struct
 import math
+import os
+import struct
+import sys
 import time
+import wave
+from pathlib import Path
+
+import pyaudio
+
+from utils.tachieViewer import TachieViewer
+
 # from fire_and_forget import fire_and_forget
 
-import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 

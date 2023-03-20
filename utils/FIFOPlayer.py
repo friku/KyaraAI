@@ -1,10 +1,12 @@
-import pdb
-import time
-import sys
 import os
+import pdb
+import sys
+import time
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.fire_and_forget import fire_and_forget
 from utils.wavePlayerWithVolume import WavPlayerWithVolume
+
 
 class FIFOPlayer:
     def __init__(self) -> None:

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 #フレームごとに画像を正弦波にしたがって上下させる。
 class FlactuateImage():
     def __init__(self):     

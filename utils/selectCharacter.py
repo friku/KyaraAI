@@ -1,6 +1,7 @@
 import pdb
 import random
 
+
 def find_string_positions(text, words, removeWords=[]):
     """テキスト内からlistに入った文字列が存在するか判定し、存在する場合、各文字列ごとに位置を返却する関数。
 

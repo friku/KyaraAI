@@ -1,9 +1,8 @@
-import pytchat
-import time
+import json
 import pdb
-import json
+import time
+
 import pytchat
-import json
 
 
 class YTComment():

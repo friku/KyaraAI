@@ -7,26 +7,28 @@
 ・
 
 '''
-import os
-import openai
-from pathlib import Path
-import pdb
 import json
-import time
-import re
+import os
+import pdb
 import random
-from utils.voicevoxUtils import text2stream, makeWaveFile,voicevoxHelthCheck
-from utils.playWaveManager import WavQueuePlayer
-from utils.textEdit import remove_chars, addText
-from utils.conversationRule import ConversationTimingChecker
-from utils.wavePlayerWithVolume import WavPlayerWithVolume
-from utils.TextReplacer import replace_words
-from utils.selectCharacter import find_string_positions, select_random_next_character
-from utils.chatRecorder import DictRecorder
-from utils.OpenAILLM import OpenAILLM
-from utils.contextDB import contextDB_json
-from utils.PromptMaker import PromptMaker
+import re
+import time
+from pathlib import Path
 
+import openai
+
+from utils.chatRecorder import DictRecorder
+from utils.contextDB import contextDB_json
+from utils.conversationRule import ConversationTimingChecker
+from utils.OpenAILLM import OpenAILLM
+from utils.playWaveManager import WavQueuePlayer
+from utils.PromptMaker import PromptMaker
+from utils.selectCharacter import (find_string_positions,
+                                   select_random_next_character)
+from utils.textEdit import addText, remove_chars
+from utils.TextReplacer import replace_words
+from utils.voicevoxUtils import makeWaveFile, text2stream, voicevoxHelthCheck
+from utils.wavePlayerWithVolume import WavPlayerWithVolume
 
 
 class CharacterAI():

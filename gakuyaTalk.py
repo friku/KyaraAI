@@ -1,18 +1,20 @@
-import os
-import openai
-from pathlib import Path
 import json
-import time
-import re
+import os
 import random
-from utils.voicevoxUtils import text2stream, makeWaveFile, voicevoxHelthCheck
-from utils.playWaveManager import WavQueuePlayer
-from utils.textEdit import remove_chars
+import re
+import time
+from pathlib import Path
+
+import openai
+
+from characterAI import CharacterAI, ChatController, OpenAILLM, contextDB_json
 from utils.conversationRule import ConversationTimingChecker
-from characterAI import OpenAILLM, contextDB_json, CharacterAI, ChatController
-from utils.wavePlayerWithVolume import WavPlayerWithVolume
-from utils.tachieViewer import TachieViewer
 from utils.FIFOPlayer import FIFOPlayer
+from utils.playWaveManager import WavQueuePlayer
+from utils.tachieViewer import TachieViewer
+from utils.textEdit import remove_chars
+from utils.voicevoxUtils import makeWaveFile, text2stream, voicevoxHelthCheck
+from utils.wavePlayerWithVolume import WavPlayerWithVolume
 
 
 def main():

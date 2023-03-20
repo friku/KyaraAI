@@ -1,17 +1,19 @@
-import pdb
+import glob
 import os
+import pdb
+import time
+
 import pydub
 from pydub.playback import play
-import time
-import glob
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from fire_and_forget import fire_and_forget
 else:
     from utils.fire_and_forget import fire_and_forget
 
 
 class WavQueuePlayer:
-    def __init__(self, directory: str = './tmpWaveDir'):
+    def __init__(self, directory: str = "./tmpWaveDir"):
         """
         指定されたディレクトリ内のWAVファイルを再生するWavQueuePlayerオブジェクトを初期化します。
 
@@ -55,22 +57,25 @@ class WavQueuePlayer:
         """
         ファイルキューを更新し、再生待ちのWAVファイルのリストを作成します。
         """
-        self.file_queue = [os.path.join(self.directory, f) for f in os.listdir(
-            self.directory) if f.endswith('.wav')]
+        self.file_queue = [
+            os.path.join(self.directory, f)
+            for f in os.listdir(self.directory)
+            if f.endswith(".wav")
+        ]
         self.file_queue.sort()
 
     def _clear_directory(self):
         """ディレクトリ内のすべての WAV ファイルを削除する"""
-        for file_path in glob.glob(os.path.join(self.directory, '*.wav')):
+        for file_path in glob.glob(os.path.join(self.directory, "*.wav")):
             os.remove(file_path)
-    
+
     def stop(self):
         self.resident = False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Example usage:
-    player = WavQueuePlayer('./tmpWaveDir')
+    player = WavQueuePlayer("./tmpWaveDir")
 
     # Play all WAV files in the queue
     player.play()
